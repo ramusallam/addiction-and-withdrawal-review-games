@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Neuroscience of Withdrawal — Review Game</title>
+<style>
+  :root {
+    --primary-deep:  #1A6B6B;
+    --primary:       #2A9D8F;
+    --warning:       #D4A843;
+    --error:         #E65C3C;
+    --accent-light:  #e8f1f0;
+    --accent-tint:   #f0f5f4;
+    --bg:            #f5f7fa;
+    --text:          #1a2d2b;
+    --muted:         #6b7d7c;
+    --border:        #d9e2e1;
+    --current-accent: var(--primary-deep);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100vh; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Hero (menu screen) ─── */
+  .hero {
+    position: relative;
+    background: linear-gradient(135deg, #1A6B6B 0%, #2A9D8F 100%);
+    color: #fff;
+    padding: 80px 24px 110px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 2px);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: clamp(1.9rem, 4.4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .hero p {
+    font-size: clamp(0.95rem, 1.6vw, 1.05rem);
+    max-width: 640px;
+    margin: 0 auto 22px;
+    opacity: 0.92;
+    line-height: 1.55;
+    position: relative;
+  }
+  .hero-pills {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+  }
+  .hero-pill {
+    background: rgba(255,255,255,0.16);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.22);
+  }
+
+  /* ─── Round card (menu screen) ─── */
+  .menu-wrap {
+    max-width: 720px;
+    margin: -60px auto 60px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 2;
+  }
+  .round-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(26, 107, 107, 0.18);
+    padding: 36px 38px;
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+  }
+  .round-card:hover { transform: translateY(-3px); box-shadow: 0 22px 48px rgba(26, 107, 107, 0.26); }
+  .round-card:active { transform: translateY(-1px); }
+  .round-numeral {
+    font-size: 4.2rem;
+    font-weight: 900;
+    color: var(--primary-deep);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 6px;
+  }
+  .round-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .round-title {
+    font-size: 1.65rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .round-desc {
+    color: var(--muted);
+    line-height: 1.55;
+    font-size: 0.96rem;
+  }
+
+  /* ─── Game view ─── */
+  .game { display: none; }
+  .game.active { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    background: #fff;
+    border-right: 1px solid var(--border);
+    padding: 24px 22px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .side-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+  }
+  .side-label {
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .back-btn {
+    background: transparent; border: none; color: var(--current-accent);
+    font-weight: 700; font-size: 0.78rem; cursor: pointer; padding: 4px 8px;
+    border-radius: 6px; transition: background 0.15s ease;
+  }
+  .back-btn:hover { background: var(--accent-tint); }
+
+  .team-selector {
+    display: flex; gap: 6px; margin-bottom: 18px;
+    background: var(--accent-tint); padding: 4px; border-radius: 10px;
+  }
+  .team-count-btn {
+    flex: 1; background: transparent; border: none;
+    padding: 7px 0; border-radius: 7px;
+    font-weight: 700; font-size: 0.85rem; color: var(--muted);
+    cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
+    font-family: inherit;
+  }
+  .team-count-btn:hover { color: var(--text); }
+  .team-count-btn.active {
+    background: var(--current-accent); color: #fff;
+    box-shadow: 0 2px 6px rgba(26, 107, 107, 0.3);
+  }
+
+  .team-card {
+    background: var(--accent-tint);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .team-name {
+    width: 100%; background: transparent; border: none;
+    border-bottom: 1px dashed transparent;
+    font-weight: 700; font-size: 0.92rem; color: var(--text);
+    padding: 2px 0; outline: none;
+    font-family: inherit;
+  }
+  .team-name:hover, .team-name:focus { border-bottom-color: var(--current-accent); }
+  .score-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 8px; gap: 6px;
+  }
+  .score {
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 1.6rem; font-weight: 700; color: var(--text);
+    min-width: 50px; text-align: center;
+  }
+  .score-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--border); background: #fff;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer; color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, transform 0.08s ease;
+  }
+  .score-btn:hover { background: var(--accent-light); }
+  .score-btn:active { transform: scale(0.92); }
+
+  .reset-link {
+    display: block; margin-top: 14px;
+    text-align: center; font-size: 0.74rem; font-weight: 700;
+    color: var(--muted); padding: 8px;
+    border: 1px dashed var(--border); border-radius: 8px;
+    cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .reset-link:hover { color: var(--error); border-color: var(--error); }
+
+  /* Main */
+  .main-area {
+    padding: 32px 40px 60px;
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .progress-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+  }
+  .progress-label {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.18em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .dots { display: flex; gap: 6px; }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    border: 1.5px solid var(--current-accent);
+    background: transparent; transition: background 0.18s ease;
+  }
+  .dot.answered { background: var(--current-accent); }
+  .dot.current { background: transparent; box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.18); }
+
+  /* Timer */
+  .timer-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    transition: border-color 0.3s ease;
+  }
+  .timer-card.warn { border-color: var(--warning); }
+  .timer-card.danger {
+    border-color: var(--error);
+    animation: timerPulse 0.6s ease;
+  }
+  @keyframes timerPulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.015); }
+  }
+  .timer-label {
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .timer-bar {
+    height: 8px; background: var(--accent-tint);
+    border-radius: 9999px; overflow: hidden;
+  }
+  .timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-deep));
+    border-radius: 9999px;
+    transition: width 1s linear;
+  }
+  .timer-fill.warn { background: linear-gradient(90deg, var(--warning), #b88a2f); }
+  .timer-fill.danger { background: linear-gradient(90deg, var(--error), #c0392b); }
+  .timer-digits {
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 1.6rem; font-weight: 700; color: var(--text);
+    min-width: 64px; text-align: right;
+    transition: color 0.3s ease;
+  }
+  .timer-digits.warn { color: var(--warning); }
+  .timer-digits.danger { color: var(--error); }
+
+  /* Question */
+  .q-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 32px 32px;
+    box-shadow: 0 6px 22px rgba(26, 107, 107, 0.06);
+    animation: cardIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .q-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px; gap: 12px; flex-wrap: wrap;
+  }
+  .q-pill {
+    display: inline-flex; align-items: center;
+    padding: 5px 12px; border-radius: 9999px;
+    background: var(--accent-tint); color: var(--primary-deep);
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .q-diff {
+    font-size: 0.72rem; font-weight: 700; color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .q-text {
+    font-size: 1.18rem; font-weight: 600; line-height: 1.5;
+    margin-bottom: 22px; color: var(--text);
+  }
+  .q-text strong { font-weight: 700; }
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+  .choice {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #fff;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.08s ease;
+    width: 100%;
+  }
+  .choice:hover:not(:disabled) {
+    border-color: var(--current-accent);
+    background: var(--accent-tint);
+  }
+  .choice:active:not(:disabled) { transform: scale(0.995); }
+  .choice:disabled { cursor: default; }
+  .choice-letter {
+    font-weight: 800; color: var(--current-accent);
+    background: var(--accent-tint);
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+  }
+  .choice-text { color: var(--text); font-size: 0.98rem; line-height: 1.45; }
+  .choice.correct { background: #e8f5ec; border-color: #2c9c4e; }
+  .choice.correct .choice-letter { background: #2c9c4e; color: #fff; }
+  .choice.wrong   { background: #fdecea; border-color: var(--error); }
+  .choice.wrong   .choice-letter { background: var(--error); color: #fff; }
+
+  .explain {
+    margin-top: 18px;
+    background: linear-gradient(135deg, #fff8ee 0%, #fdf3e0 100%);
+    border-left: 3px solid var(--warning);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.95rem; line-height: 1.55; color: var(--text);
+    animation: cardIn 0.32s ease;
+  }
+  .explain[hidden] { display: none !important; }
+  .explain-label {
+    display: inline-block;
+    font-size: 0.66rem; font-weight: 800;
+    letter-spacing: 0.18em; color: #a8832f;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .explain strong { font-weight: 700; }
+
+  .q-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 24px; gap: 12px;
+  }
+  .btn-ghost, .btn-primary {
+    font-family: inherit; font-size: 0.92rem; font-weight: 700;
+    padding: 10px 22px; border-radius: 10px; cursor: pointer;
+    transition: background 0.15s ease, transform 0.08s ease, filter 0.15s ease;
+  }
+  .btn-ghost {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--text); background: var(--accent-tint); }
+  .btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+    color: #fff; border: none;
+    box-shadow: 0 4px 14px rgba(26, 107, 107, 0.28);
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:active { transform: scale(0.97); }
+
+  /* Round complete */
+  .complete {
+    background: #fff;
+    border-radius: 18px;
+    padding: 56px 36px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 32px rgba(26, 107, 107, 0.12);
+  }
+  .complete h2 {
+    font-size: 2.2rem; font-weight: 800; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .complete p {
+    color: var(--muted); font-size: 1.02rem; line-height: 1.55;
+    max-width: 480px; margin: 0 auto 24px;
+  }
+
+  /* Mobile */
+  @media (max-width: 900px) {
+    .game.active { grid-template-columns: 1fr; }
+    .sidebar {
+      position: static; height: auto; border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .main-area { padding: 24px 18px 60px; }
+  }
+  @media (max-width: 640px) {
+    .timer-card { grid-template-columns: 1fr; gap: 8px; }
+    .timer-digits { text-align: left; min-width: 0; }
+    .q-card { padding: 22px 20px 24px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ──────────────── MENU ──────────────── -->
+  <div id="menu">
+    <section class="hero">
+      <h1>Neuroscience of Withdrawal</h1>
+      <p>A 10-question challenge on how Fentanyl, Methamphetamine, Alcohol, and MDMA hijack the synapse — and what happens when they're gone.</p>
+      <div class="hero-pills">
+        <span class="hero-pill">Mechanism</span>
+        <span class="hero-pill">Tolerance</span>
+        <span class="hero-pill">Withdrawal</span>
+      </div>
+    </section>
+    <div class="menu-wrap">
+      <div class="round-card" onclick="startGame()">
+        <div class="round-numeral">1</div>
+        <div class="round-label">One Round · 10 Questions</div>
+        <div class="round-title">The Synapse Under Siege</div>
+        <div class="round-desc">Identify the neurotransmitters in play, classify each drug, trace the cascade from mechanism to withdrawal, and reason about why some withdrawals are fatal. 60 seconds per question. Tap to start.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────── GAME ──────────────── -->
+  <div class="game" id="game">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="side-top">
+        <div class="side-label">Scoreboard</div>
+        <button class="back-btn" onclick="backToMenu()">← Menu</button>
+      </div>
+
+      <div class="team-selector" id="teamSelector">
+        <button class="team-count-btn" data-count="2">2</button>
+        <button class="team-count-btn active" data-count="3">3</button>
+        <button class="team-count-btn" data-count="4">4</button>
+        <button class="team-count-btn" data-count="5">5</button>
+      </div>
+
+      <div id="teams"></div>
+
+      <div class="reset-link" onclick="resetScores()">Reset scores</div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-area" id="mainArea">
+      <!-- Q card injected here -->
+    </main>
+  </div>
+
+<script>
+/* ─── Question bank ─── */
+const QUESTIONS = [
+  {
+    category: 'Neurotransmitters',
+    difficulty: 'Easy',
+    q: 'The brain\'s principal <strong>inhibitory</strong> neurotransmitter, often called the "brake," is:',
+    choices: ['Dopamine', 'Glutamate', 'GABA', 'Serotonin'],
+    answer: 2,
+    explanation: 'GABA is the brain\'s main inhibitory neurotransmitter — it slows neuron activity. Glutamate is the gas pedal. GABA is the brake.'
+  },
+  {
+    category: 'Drug Class',
+    difficulty: 'Easy',
+    q: 'Methamphetamine is classified as a:',
+    choices: ['Depressant', 'Stimulant', 'Opioid', 'Empathogen'],
+    answer: 1,
+    explanation: 'Methamphetamine forces a massive flood of dopamine into the synapse. That \'s what makes it a <strong>stimulant</strong>. (Alcohol = depressant, fentanyl = opioid, MDMA = empathogen.)'
+  },
+  {
+    category: 'Mechanism',
+    difficulty: 'Medium',
+    q: 'Fentanyl produces its powerful pain-relief and euphoria by binding to:',
+    choices: ['GABA-A receptors', 'NMDA receptors', 'μ-opioid receptors', 'Dopamine D2 receptors'],
+    answer: 2,
+    explanation: 'Fentanyl mimics the body\'s natural <strong>endorphins</strong> by binding μ-opioid receptors. These receptors live throughout the brain AND the peripheral nervous system along pain pathways, which is why opioids work body-wide.'
+  },
+  {
+    category: 'Withdrawal',
+    difficulty: 'Hard',
+    q: 'Alcohol withdrawal can be <strong>fatal</strong>, while withdrawal from the other drugs in this unit is not. Why?',
+    choices: [
+      'Alcohol is the only one that crosses the blood-brain barrier',
+      'GABA tone collapses while glutamate rebounds, producing uncontrolled excitation and seizures',
+      'Alcohol permanently destroys dopamine neurons',
+      'Endorphin receptors burn out from overstimulation'
+    ],
+    answer: 1,
+    explanation: 'Alcohol boosts GABA (the brake) and blocks glutamate (the gas). The body adapts by downregulating GABA receptors and ramping up glutamate signaling. When alcohol is removed, those adaptations are unmasked: tremors, anxiety, hallucinations, seizures, and in severe cases delirium tremens, which can be fatal.'
+  },
+  {
+    category: 'Tolerance',
+    difficulty: 'Medium',
+    q: 'The brain develops <strong>tolerance</strong> to chronic methamphetamine use by:',
+    choices: [
+      'Producing more dopamine to compensate',
+      'Thickening the blood-brain barrier',
+      'Downregulating dopamine receptors to lower sensitivity',
+      'Speeding up reuptake transporters'
+    ],
+    answer: 2,
+    explanation: 'Sensing abnormally high dopamine, the brain protects itself by reducing the <strong>number of receptors</strong> rather than the neurotransmitter directly. Sensitivity drops, and more drug is needed to reach the same effect.'
+  },
+  {
+    category: 'Structure & System',
+    difficulty: 'Medium',
+    q: 'MDMA\'s skeletal structure most closely resembles which neurotransmitter, hinting at which system it primarily disrupts?',
+    choices: ['Dopamine', 'Serotonin', 'Glutamate', 'GABA'],
+    answer: 1,
+    explanation: 'MDMA and <strong>serotonin</strong> share the phenethylamine backbone. That structural mimicry is why MDMA primarily floods the synapse with serotonin (and also reverses the serotonin transporter, actively pumping more out).'
+  },
+  {
+    category: 'Indirect Effects',
+    difficulty: 'Hard',
+    q: 'Heroin does NOT bind GABA or dopamine receptors directly, yet it strongly affects both systems. How?',
+    choices: [
+      'It crosses the blood-brain barrier',
+      'It mimics glutamate at NMDA receptors',
+      'It binds μ-opioid receptors, silencing GABA interneurons that normally hold back dopamine neurons',
+      'It blocks the production of all neurotransmitters at once'
+    ],
+    answer: 2,
+    explanation: 'Heroin\'s primary action is on the endorphin system. By silencing GABA interneurons in the reward pathway, it lifts the brake on dopamine. The effects on GABA and dopamine are <strong>indirect</strong>, riding along through the endorphin system.'
+  },
+  {
+    category: 'Whole-Body Effects',
+    difficulty: 'Hard',
+    q: 'Why does heroin withdrawal hurt throughout the <strong>entire body</strong>, not just in the brain?',
+    choices: [
+      'Heroin damages muscle tissue directly',
+      'μ-opioid receptors run throughout the peripheral nervous system along every pain pathway',
+      'Glutamate is released into the bloodstream during withdrawal',
+      'The kidneys can\'t filter the metabolites fast enough'
+    ],
+    answer: 1,
+    explanation: 'Endorphins evolved as a survival mechanism for injury, escape, and childbirth, so their receptors live throughout the body\'s pain pathways. When the endorphin system is disrupted, every pain signal across the body comes through full strength.'
+  },
+  {
+    category: 'Shared Mechanism',
+    difficulty: 'Hard',
+    q: 'Methamphetamine and MDMA are unique among the drugs in this unit because they both:',
+    choices: [
+      'Are opioids',
+      'Cause uncontrolled seizures during withdrawal',
+      'Not only block reuptake but also actively force their neurotransmitter out of the cell into the synapse',
+      'Bind GABA receptors directly'
+    ],
+    answer: 2,
+    explanation: 'Meth and MDMA reverse the transporter, <em>pumping</em> dopamine (meth) or serotonin (MDMA) out into the synapse. They don\'t just block cleanup — they actively flood the system. Their similar skeletal structures (both phenethylamines) explain why they share this mechanism.'
+  },
+  {
+    category: 'Evolution',
+    difficulty: 'Hard',
+    q: 'The body\'s ability to drop pain and produce euphoria during injury, escape, or childbirth is best understood as:',
+    choices: [
+      'An accidental side effect of glutamate',
+      'An evolutionary survival mechanism mediated by endorphins, which opioid drugs hijack',
+      'A property of dopamine receptors',
+      'A defense mechanism of the immune system'
+    ],
+    answer: 1,
+    explanation: 'Endorphins evolved to keep an organism functional when wounded or in danger. Opioid drugs like heroin and fentanyl hijack this exact system, which is why their effects feel like an extreme version of natural pain relief and euphoria, and why withdrawal feels like the system being yanked out from under you.'
+  }
+];
+
+/* ─── State ─── */
+const state = {
+  teamCount: 3,
+  teamNames: [],
+  teamScores: [],
+  currentQ: 0,
+  answered: new Array(QUESTIONS.length).fill(false),
+  timerInterval: null,
+  secondsLeft: 60,
+  audioCtx: null,
+};
+
+/* ─── Persistence ─── */
+const NAME_KEY = 'awrg-team-names';
+const SCORE_KEY = 'awrg-team-scores';
+const COUNT_KEY = 'awrg-team-count';
+
+function loadFromStorage() {
+  try {
+    const c = parseInt(localStorage.getItem(COUNT_KEY) || '3', 10);
+    state.teamCount = (c >= 2 && c <= 5) ? c : 3;
+    state.teamNames  = JSON.parse(localStorage.getItem(NAME_KEY)  || '[]');
+    state.teamScores = JSON.parse(localStorage.getItem(SCORE_KEY) || '[]');
+  } catch (e) {}
+  while (state.teamNames.length  < 5) state.teamNames.push(`Team ${state.teamNames.length + 1}`);
+  while (state.teamScores.length < 5) state.teamScores.push(0);
+}
+function saveNames()  { localStorage.setItem(NAME_KEY,  JSON.stringify(state.teamNames)); }
+function saveScores() { localStorage.setItem(SCORE_KEY, JSON.stringify(state.teamScores)); }
+function saveCount()  { localStorage.setItem(COUNT_KEY, String(state.teamCount)); }
+
+/* ─── Menu / game transitions ─── */
+function startGame() {
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('game').classList.add('active');
+  state.currentQ = 0;
+  state.answered.fill(false);
+  renderTeams();
+  renderQuestion();
+}
+function backToMenu() {
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  document.getElementById('game').classList.remove('active');
+  document.getElementById('menu').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ─── Team selector + scoreboard ─── */
+document.querySelectorAll('.team-count-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.teamCount = parseInt(btn.dataset.count, 10);
+    saveCount();
+    document.querySelectorAll('.team-count-btn').forEach(b => b.classList.toggle('active', b === btn));
+    renderTeams();
+  });
+});
+
+function renderTeams() {
+  document.querySelectorAll('.team-count-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.count,10) === state.teamCount);
+  });
+  const c = document.getElementById('teams');
+  c.innerHTML = '';
+  for (let i = 0; i < state.teamCount; i++) {
+    const card = document.createElement('div');
+    card.className = 'team-card';
+    card.innerHTML = `
+      <input class="team-name" value="${state.teamNames[i]}" data-i="${i}" />
+      <div class="score-row">
+        <button class="score-btn" data-i="${i}" data-d="-1">−</button>
+        <div class="score" id="sc-${i}">${state.teamScores[i]}</div>
+        <button class="score-btn" data-i="${i}" data-d="1">+</button>
+      </div>`;
+    c.appendChild(card);
+  }
+  c.querySelectorAll('.team-name').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = parseInt(e.target.dataset.i, 10);
+      state.teamNames[i] = e.target.value;
+      saveNames();
+    });
+  });
+  c.querySelectorAll('.score-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.i, 10);
+      const d = parseInt(btn.dataset.d, 10);
+      state.teamScores[i] = Math.max(0, state.teamScores[i] + d);
+      document.getElementById(`sc-${i}`).textContent = state.teamScores[i];
+      saveScores();
+    });
+  });
+}
+function resetScores() {
+  if (!confirm('Reset all team scores to zero?')) return;
+  state.teamScores = state.teamScores.map(() => 0);
+  saveScores();
+  renderTeams();
+}
+
+/* ─── Audio (calm two-note chime at 0) ─── */
+function getAudio() {
+  if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+  return state.audioCtx;
+}
+function playTimeUpChime() {
+  const ctx = getAudio();
+  const t0 = ctx.currentTime;
+  function blip(freq, when, dur) {
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t0 + when);
+    gain.gain.setValueAtTime(0, t0 + when);
+    gain.gain.linearRampToValueAtTime(0.18, t0 + when + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + when + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0 + when);
+    osc.stop(t0 + when + dur + 0.05);
+  }
+  blip(523.25, 0,    0.55); // C5
+  blip(392.00, 0.32, 0.85); // G4
+}
+
+/* ─── Timer ─── */
+function startTimer() {
+  state.secondsLeft = 60;
+  updateTimerUI();
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    state.secondsLeft--;
+    if (state.secondsLeft <= 0) {
+      clearInterval(state.timerInterval);
+      state.secondsLeft = 0;
+      updateTimerUI();
+      playTimeUpChime();
+      return;
+    }
+    updateTimerUI();
+  }, 1000);
+}
+function stopTimer() {
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+}
+function updateTimerUI() {
+  const card = document.getElementById('timer-card');
+  const fill = document.getElementById('timer-fill');
+  const dig  = document.getElementById('timer-digits');
+  if (!card || !fill || !dig) return;
+  const pct = (state.secondsLeft / 60) * 100;
+  fill.style.width = pct + '%';
+  const m = Math.floor(state.secondsLeft / 60);
+  const s = String(state.secondsLeft % 60).padStart(2, '0');
+  dig.textContent = `${m}:${s}`;
+  card.classList.remove('warn', 'danger');
+  fill.classList.remove('warn', 'danger');
+  dig .classList.remove('warn', 'danger');
+  if (state.secondsLeft === 0) {
+    card.classList.add('danger');
+    fill.classList.add('danger');
+    dig .classList.add('danger');
+  } else if (state.secondsLeft <= 10) {
+    card.classList.add('warn');
+    fill.classList.add('warn');
+    dig .classList.add('warn');
+  }
+}
+
+/* ─── Question render ─── */
+function renderQuestion() {
+  stopTimer();
+  const i = state.currentQ;
+  const main = document.getElementById('mainArea');
+
+  if (i >= QUESTIONS.length) { renderComplete(); return; }
+
+  const q = QUESTIONS[i];
+  const total = QUESTIONS.length;
+  const dotsHTML = Array.from({length: total}, (_, n) => {
+    const cls = n < i ? 'dot answered' : n === i ? 'dot current' : 'dot';
+    return `<span class="${cls}"></span>`;
+  }).join('');
+
+  const choicesHTML = q.choices.map((c, ci) => `
+    <button class="choice" data-i="${ci}" onclick="selectChoice(${ci})">
+      <span class="choice-letter">${String.fromCharCode(65 + ci)}</span>
+      <span class="choice-text">${c}</span>
+    </button>
+  `).join('');
+
+  main.innerHTML = `
+    <div class="progress-row">
+      <div class="progress-label">Question ${i + 1} of ${total}</div>
+      <div class="dots">${dotsHTML}</div>
+    </div>
+
+    <div class="timer-card" id="timer-card">
+      <div class="timer-label">Time</div>
+      <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+      <div class="timer-digits" id="timer-digits">1:00</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-top">
+        <span class="q-pill">${q.category}</span>
+        <span class="q-diff">${q.difficulty}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="choices" id="choices">${choicesHTML}</div>
+      <div class="explain" id="explain" hidden>
+        <div class="explain-label">Why</div>
+        <div id="explain-text"></div>
+      </div>
+      <div class="q-footer">
+        <button class="btn-ghost" onclick="prevQ()" ${i === 0 ? 'disabled' : ''}>← Previous</button>
+        <button class="btn-primary" onclick="nextQ()">${i === total - 1 ? 'Finish round' : 'Next question →'}</button>
+      </div>
+    </div>
+  `;
+
+  startTimer();
+}
+
+function selectChoice(ci) {
+  const q = QUESTIONS[state.currentQ];
+  const buttons = document.querySelectorAll('.choice');
+  buttons.forEach((b, bi) => {
+    b.disabled = true;
+    if (bi === q.answer) b.classList.add('correct');
+    else if (bi === ci)  b.classList.add('wrong');
+  });
+  const ex = document.getElementById('explain');
+  document.getElementById('explain-text').innerHTML = q.explanation;
+  ex.hidden = false;
+  state.answered[state.currentQ] = true;
+  stopTimer();
+}
+
+function nextQ() {
+  state.currentQ++;
+  renderQuestion();
+}
+function prevQ() {
+  if (state.currentQ > 0) {
+    state.currentQ--;
+    renderQuestion();
+  }
+}
+
+function renderComplete() {
+  const main = document.getElementById('mainArea');
+  main.innerHTML = `
+    <div class="complete">
+      <h2>Round complete</h2>
+      <p>Tally team scores from the scoreboard. Reset and play again, or step back to revisit the source app.</p>
+      <button class="btn-primary" onclick="backToMenu()">Back to menu</button>
+    </div>
+  `;
+}
+
+/* ─── Boot ─── */
+loadFromStorage();
+renderTeams();
+</script>
+</body>
+</html>
