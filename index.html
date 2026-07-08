@@ -4,24 +4,37 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Neuroscience of Withdrawal — Review Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Roboto+Mono:wght@400;500;700&family=Roboto+Serif:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary-deep:  #1A6B6B;
-    --primary:       #2A9D8F;
-    --warning:       #D4A843;
-    --error:         #E65C3C;
-    --accent-light:  #e8f1f0;
-    --accent-tint:   #f0f5f4;
-    --bg:            #f5f7fa;
-    --text:          #1a2d2b;
-    --muted:         #6b7d7c;
-    --border:        #d9e2e1;
-    --current-accent: var(--primary-deep);
+    --primary-deep:  #4F46E5;
+    --primary:       #6366F1;
+    --indigo-2:      #818CF8;
+    --indigo-soft:   rgba(99,102,241,0.09);
+    --indigo-line:   rgba(99,102,241,0.30);
+    --warning:       #B4791F;
+    --error:         #EF4444;
+    --accent-light:  #EEF0FF;
+    --accent-tint:   var(--indigo-soft);
+    --bg:            #F7F3EE;
+    --cream:         #F0EBE3;
+    --text:          #1C1917;
+    --muted:         #57534E;
+    --muted-2:       #7C6F5A;
+    --border:        #E8E0D2;
+    --border-soft:   #F0EBE3;
+    --current-accent: var(--primary);
+    --font-sans:'Inter',system-ui,-apple-system,sans-serif;
+    --font-serif:'Roboto Serif',Georgia,Cambria,serif;
+    --font-mono:'Roboto Mono',monospace;
+    --sh-sm:0 1px 2px rgba(17,17,17,0.05),0 2px 6px rgba(17,17,17,0.08);
+    --sh-md:0 4px 12px rgba(17,17,17,0.06),0 2px 4px rgba(17,17,17,0.04);
+    --sh-lg:0 16px 40px rgba(17,17,17,0.10),0 4px 12px rgba(17,17,17,0.06);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { min-height: 100vh; }
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-sans);
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
@@ -30,7 +43,7 @@
   /* ─── Hero (menu screen) ─── */
   .hero {
     position: relative;
-    background: linear-gradient(135deg, #1A6B6B 0%, #2A9D8F 100%);
+    background: linear-gradient(150deg, #4F46E5 0%, #6366F1 100%);
     color: #fff;
     padding: 80px 24px 110px;
     text-align: center;
@@ -39,14 +52,21 @@
   .hero::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 2px);
-    background-size: 22px 22px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 2px);
+    background-size: 40px 40px;
     pointer-events: none;
   }
+  .hero-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.34em; text-transform: uppercase;
+    opacity: 0.9; margin-bottom: 12px; position: relative;
+  }
   .hero h1 {
-    font-size: clamp(1.9rem, 4.4vw, 2.8rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-size: clamp(1.9rem, 4.4vw, 2.7rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
     margin-bottom: 12px;
     position: relative;
   }
@@ -66,13 +86,14 @@
     position: relative;
   }
   .hero-pill {
-    background: rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.18);
     color: #fff;
     padding: 6px 14px;
     border-radius: 9999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     border: 1px solid rgba(255,255,255,0.22);
   }
@@ -87,33 +108,37 @@
   }
   .round-card {
     background: #fff;
-    border-radius: 18px;
-    box-shadow: 0 16px 40px rgba(26, 107, 107, 0.18);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--sh-lg);
     padding: 36px 38px;
     cursor: pointer;
-    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  .round-card:hover { transform: translateY(-3px); box-shadow: 0 22px 48px rgba(26, 107, 107, 0.26); }
+  .round-card:hover { transform: translateY(-5px); box-shadow: var(--sh-lg); }
   .round-card:active { transform: translateY(-1px); }
   .round-numeral {
+    font-family: var(--font-mono);
     font-size: 4.2rem;
-    font-weight: 900;
-    color: var(--primary-deep);
+    font-weight: 700;
+    color: var(--primary);
     line-height: 1;
     letter-spacing: -0.04em;
     margin-bottom: 6px;
   }
   .round-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.25em;
+    color: var(--primary);
     text-transform: uppercase;
     margin-bottom: 6px;
   }
   .round-title {
+    font-family: var(--font-serif);
     font-size: 1.65rem;
-    font-weight: 800;
+    font-weight: 700;
     margin-bottom: 10px;
     letter-spacing: -0.01em;
   }
@@ -142,8 +167,9 @@
     margin-bottom: 18px;
   }
   .side-label {
-    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 900; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--primary);
   }
   .back-btn {
     background: transparent; border: none; color: var(--current-accent);
@@ -166,7 +192,7 @@
   .team-count-btn:hover { color: var(--text); }
   .team-count-btn.active {
     background: var(--current-accent); color: #fff;
-    box-shadow: 0 2px 6px rgba(26, 107, 107, 0.3);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
   }
 
   .team-card {
@@ -189,8 +215,9 @@
     margin-top: 8px; gap: 6px;
   }
   .score {
-    font-family: 'Roboto Mono', ui-monospace, monospace;
-    font-size: 1.6rem; font-weight: 700; color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 1.6rem; font-weight: 700; color: var(--primary);
+    font-variant-numeric: tabular-nums;
     min-width: 50px; text-align: center;
   }
   .score-btn {
@@ -224,8 +251,9 @@
     margin-bottom: 18px;
   }
   .progress-label {
-    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.18em;
-    color: var(--muted); text-transform: uppercase;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 900; letter-spacing: 0.25em;
+    color: var(--primary); text-transform: uppercase;
   }
   .dots { display: flex; gap: 6px; }
   .dot {
@@ -234,7 +262,7 @@
     background: transparent; transition: background 0.18s ease;
   }
   .dot.answered { background: var(--current-accent); }
-  .dot.current { background: transparent; box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.18); }
+  .dot.current { background: transparent; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18); }
 
   /* Timer */
   .timer-card {
@@ -259,24 +287,26 @@
     50% { transform: scale(1.015); }
   }
   .timer-label {
-    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em;
-    color: var(--muted); text-transform: uppercase;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 900; letter-spacing: 0.25em;
+    color: var(--primary); text-transform: uppercase;
   }
   .timer-bar {
-    height: 8px; background: var(--accent-tint);
+    height: 8px; background: var(--border-soft);
     border-radius: 9999px; overflow: hidden;
   }
   .timer-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--primary-deep));
+    background: linear-gradient(90deg, var(--primary), var(--indigo-2));
     border-radius: 9999px;
     transition: width 1s linear;
   }
   .timer-fill.warn { background: linear-gradient(90deg, var(--warning), #b88a2f); }
   .timer-fill.danger { background: linear-gradient(90deg, var(--error), #c0392b); }
   .timer-digits {
-    font-family: 'Roboto Mono', ui-monospace, monospace;
-    font-size: 1.6rem; font-weight: 700; color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 1.6rem; font-weight: 700; color: var(--primary);
+    font-variant-numeric: tabular-nums;
     min-width: 64px; text-align: right;
     transition: color 0.3s ease;
   }
@@ -287,9 +317,9 @@
   .q-card {
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 16px;
     padding: 28px 32px 32px;
-    box-shadow: 0 6px 22px rgba(26, 107, 107, 0.06);
+    box-shadow: var(--sh-md);
     animation: cardIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   @keyframes cardIn {
@@ -303,16 +333,19 @@
   .q-pill {
     display: inline-flex; align-items: center;
     padding: 5px 12px; border-radius: 9999px;
-    background: var(--accent-tint); color: var(--primary-deep);
-    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em;
+    background: var(--indigo-soft); color: var(--primary);
+    font-family: var(--font-mono);
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em;
     text-transform: uppercase;
   }
   .q-diff {
-    font-size: 0.72rem; font-weight: 700; color: var(--muted);
-    letter-spacing: 0.06em;
+    font-family: var(--font-mono);
+    font-size: 0.7rem; font-weight: 500; color: var(--muted-2);
+    letter-spacing: 0.06em; text-transform: uppercase;
   }
   .q-text {
-    font-size: 1.18rem; font-weight: 600; line-height: 1.5;
+    font-family: var(--font-serif);
+    font-size: 1.24rem; font-weight: 600; line-height: 1.5;
     margin-bottom: 22px; color: var(--text);
   }
   .q-text strong { font-weight: 700; }
@@ -336,8 +369,9 @@
   .choice:active:not(:disabled) { transform: scale(0.995); }
   .choice:disabled { cursor: default; }
   .choice-letter {
-    font-weight: 800; color: var(--current-accent);
-    background: var(--accent-tint);
+    font-family: var(--font-mono);
+    font-weight: 700; color: var(--current-accent);
+    background: var(--indigo-soft);
     width: 26px; height: 26px;
     border-radius: 7px;
     display: inline-flex; align-items: center; justify-content: center;
@@ -345,14 +379,14 @@
     flex-shrink: 0;
   }
   .choice-text { color: var(--text); font-size: 0.98rem; line-height: 1.45; }
-  .choice.correct { background: #e8f5ec; border-color: #2c9c4e; }
-  .choice.correct .choice-letter { background: #2c9c4e; color: #fff; }
-  .choice.wrong   { background: #fdecea; border-color: var(--error); }
+  .choice.correct { background: #EEF6E9; border-color: #16A34A; }
+  .choice.correct .choice-letter { background: #16A34A; color: #fff; }
+  .choice.wrong   { background: #FDECEA; border-color: var(--error); }
   .choice.wrong   .choice-letter { background: var(--error); color: #fff; }
 
   .explain {
     margin-top: 18px;
-    background: linear-gradient(135deg, #fff8ee 0%, #fdf3e0 100%);
+    background: #FBF3E2;
     border-left: 3px solid var(--warning);
     border-radius: 10px;
     padding: 14px 18px;
@@ -362,8 +396,9 @@
   .explain[hidden] { display: none !important; }
   .explain-label {
     display: inline-block;
-    font-size: 0.66rem; font-weight: 800;
-    letter-spacing: 0.18em; color: #a8832f;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 900;
+    letter-spacing: 0.25em; color: var(--warning);
     text-transform: uppercase;
     margin-bottom: 4px;
   }
@@ -387,7 +422,7 @@
   .btn-primary {
     background: linear-gradient(135deg, var(--primary-deep), var(--primary));
     color: #fff; border: none;
-    box-shadow: 0 4px 14px rgba(26, 107, 107, 0.28);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.28);
   }
   .btn-primary:hover { filter: brightness(1.06); }
   .btn-primary:active { transform: scale(0.97); }
@@ -396,11 +431,12 @@
   /* Bonus question */
   .bonus-banner {
     display: inline-flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, #7A2D4E, #D4A843);
+    background: linear-gradient(135deg, #4F46E5, #818CF8);
     color: #fff;
     padding: 5px 14px;
     border-radius: 9999px;
-    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em;
+    font-family: var(--font-mono);
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em;
     text-transform: uppercase;
   }
   .bonus-q .q-card {
@@ -410,7 +446,7 @@
   .bonus-q .q-text { font-size: 1.1rem; line-height: 1.6; }
   .bonus-q .q-text ul li { margin-bottom: 4px; }
   .bonus-instruction {
-    background: var(--accent-tint);
+    background: var(--indigo-soft);
     border-radius: 10px;
     padding: 14px 18px;
     margin-top: 4px;
@@ -422,36 +458,37 @@
   .bonus-reveal-btn {
     margin-top: 18px;
     width: 100%;
-    background: linear-gradient(135deg, #7A2D4E, #b73d6a);
+    background: linear-gradient(135deg, var(--primary-deep), var(--primary));
     color: #fff;
     border: none;
     padding: 16px 24px;
     border-radius: 12px;
-    font-family: inherit;
+    font-family: var(--font-sans);
     font-size: 1rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 0.04em;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(122, 45, 78, 0.28);
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.28);
     transition: filter 0.15s ease, transform 0.08s ease;
   }
   .bonus-reveal-btn:hover { filter: brightness(1.06); }
   .bonus-reveal-btn:active { transform: scale(0.98); }
   .bonus-reveal-btn[disabled] {
-    background: linear-gradient(135deg, #6b7d7c, #a8bab8);
+    background: linear-gradient(135deg, var(--muted-2), #C4B79F);
     cursor: default; opacity: 0.7;
   }
 
   .complete {
     background: #fff;
-    border-radius: 18px;
+    border-radius: 16px;
     padding: 56px 36px;
     text-align: center;
     border: 1px solid var(--border);
-    box-shadow: 0 12px 32px rgba(26, 107, 107, 0.12);
+    box-shadow: var(--sh-lg);
   }
   .complete h2 {
-    font-size: 2.2rem; font-weight: 800; margin-bottom: 12px;
+    font-family: var(--font-serif);
+    font-size: 2.2rem; font-weight: 700; margin-bottom: 12px;
     background: linear-gradient(135deg, var(--primary-deep), var(--primary));
     -webkit-background-clip: text; background-clip: text;
     color: transparent;
@@ -482,6 +519,7 @@
   <!-- ──────────────── MENU ──────────────── -->
   <div id="menu">
     <section class="hero">
+      <div class="hero-kicker">Neuroscience &middot; Review Game</div>
       <h1>Neuroscience of Withdrawal</h1>
       <p>Ten very hard questions on how Fentanyl, Methamphetamine, Alcohol, and MDMA hijack the synapse, plus a five-minute team challenge to draw the mechanism of serotonin syndrome.</p>
       <div class="hero-pills">
