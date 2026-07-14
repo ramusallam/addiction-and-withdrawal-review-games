@@ -720,7 +720,19 @@ const state = {
   timerInterval: null,
   secondsLeft: 60,
   audioCtx: null,
+  curChoices: [],   // choices in shuffled display order for the current question
+  curAnswer: -1,    // index of the correct answer within curChoices
 };
+
+// Fisher–Yates shuffle — returns a shuffled copy, original untouched.
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 /* ─── Persistence ─── */
 const NAME_KEY = 'awrg-team-names';
@@ -936,7 +948,10 @@ function renderQuestion() {
     return;
   }
 
-  const choicesHTML = q.choices.map((c, ci) => `
+  const order = shuffle(q.choices.map((_, ci) => ci));
+  state.curChoices = order.map(ci => q.choices[ci]);
+  state.curAnswer = order.indexOf(q.answer);
+  const choicesHTML = state.curChoices.map((c, ci) => `
     <button class="choice" data-i="${ci}" onclick="selectChoice(${ci})">
       <span class="choice-letter">${String.fromCharCode(65 + ci)}</span>
       <span class="choice-text">${c}</span>
@@ -992,7 +1007,7 @@ function selectChoice(ci) {
   const buttons = document.querySelectorAll('.choice');
   buttons.forEach((b, bi) => {
     b.disabled = true;
-    if (bi === q.answer) b.classList.add('correct');
+    if (bi === state.curAnswer) b.classList.add('correct');
     else if (bi === ci)  b.classList.add('wrong');
   });
   const ex = document.getElementById('explain');
